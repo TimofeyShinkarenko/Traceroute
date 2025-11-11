@@ -1,0 +1,68 @@
+#!/usr/bin/env python3
+from tracer import Tracer
+from protocol import Protocol
+import argparse
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Traceroute tool using ICMP, TCP, or UDP.")
+
+    parser.add_argument(
+        "-n", "--number_requests",
+        type=int,
+        default=30,
+        help="Maximum time to life (number of hops). Default: 30"
+    )
+    parser.add_argument(
+        "-t", "--timeout",
+        type=float,
+        default=2,
+        help="Maximum time to wait for a request in seconds. Default: 2"
+    )
+    parser.add_argument(
+        "-p", "--port",
+        type=int,
+        default=33434,
+        help="Target port for UDP and TCP. Default: 80"
+    )
+    parser.add_argument(
+        "target_ip",
+        type=str,
+        help="Target of traceroute (IP address or domain name)"
+    )
+    parser.add_argument(
+        "protocol",
+        type=str,
+        help="Protocol to use (ICMP, TCP, UDP)"
+    )
+
+    return parser.parse_args()
+
+
+def run():
+    args = parse_args()
+    print(args)
+
+    protocol_dict = {
+        "ICMP": Protocol.ICMP,
+        "TCP": Protocol.TCP,
+        "UDP": Protocol.UDP
+    }
+
+    protocol = protocol_dict[args.protocol]
+
+    tracer = Tracer(
+        protocol=protocol,
+        target_ip=args.target_ip,
+        target_port=args.port,
+        timeout=args.timeout,
+        ttl=args.number_requests,
+    )
+
+    for ans in tracer.traceroute():
+        print(ans)
+
+
+if __name__ == "__main__":
+    run()
